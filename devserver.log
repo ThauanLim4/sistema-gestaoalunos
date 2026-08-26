@@ -1,0 +1,42 @@
+
+> sistema-gestaoalunos@0.1.0 dev
+> next dev
+
+▲ Next.js 16.3.0 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.56.1:3000
+- Environments: .env.local
+✓ Ready in 631ms
+✓ Running next.config.mjs took 29ms
+
+ GET / 200 in 2.1s (next.js: 788ms, proxy.ts: 611ms, application-code: 716ms)
+ GET /login 200 in 88ms (next.js: 29ms, proxy.ts: 5ms, application-code: 54ms)
+ GET /login 200 in 49ms (next.js: 12ms, proxy.ts: 5ms, application-code: 32ms)
+ GET / 200 in 1481ms (next.js: 10ms, proxy.ts: 597ms, application-code: 875ms)
+[browser] {
+  code: [32m'23502'[39m,
+  details: [1mnull[22m,
+  hint: [1mnull[22m,
+  message: [32m'null value in column "cpf" of relation "alunos" violates not-null constraint'[39m
+} 
+
+ GET /login 307 in 11ms (proxy.ts: 4ms)
+ GET /login 200 in 30ms (next.js: 6ms, proxy.ts: 5ms, application-code: 18ms)
+ GET / 200 in 893ms (next.js: 6ms, proxy.ts: 324ms, application-code: 563ms)
+ GET / 200 in 839ms (next.js: 5ms, proxy.ts: 320ms, application-code: 514ms)
+[browser] {
+  code: [32m'23502'[39m,
+  details: [1mnull[22m,
+  hint: [1mnull[22m,
+  message: [32m'null value in column "cpf" of relation "alunos" violates not-null constraint'[39m
+} 
+
+ GET / 200 in 1608ms (next.js: 6ms, proxy.ts: 680ms, application-code: 922ms)
+[browser] {
+  code: [32m'23502'[39m,
+  details: [1mnull[22m,
+  hint: [1mnull[22m,
+  message: [32m'null value in column "cpf" of relation "alunos" violates not-null constraint'[39m
+} 
+
+[?25h
