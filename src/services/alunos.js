@@ -85,6 +85,34 @@ export async function atualizarAluno(id, dados, supabase = getBrowserClient()) {
 }
 
 export async function excluirAluno(id, supabase = getBrowserClient()) {
+  const { data: pagamentosDoAluno, error: pgErr } = await supabase
+    .from('pagamentos')
+    .select('id')
+    .eq('aluno_id', id)
+  if (pgErr) throw pgErr
+
+  if (pagamentosDoAluno && pagamentosDoAluno.length > 0) {
+    const ids = pagamentosDoAluno.map((p) => p.id)
+
+    const { error: histErr } = await supabase
+      .from('historico_pagamentos')
+      .delete()
+      .in('pagamento_id', ids)
+    if (histErr) throw histErr
+
+    const { error: contratoErr } = await supabase
+      .from('pagamentos')
+      .delete()
+      .eq('aluno_id', id)
+    if (contratoErr) throw contratoErr
+  }
+
+  const { error: faltaErr } = await supabase
+    .from('faltas')
+    .delete()
+    .eq('aluno_id', id)
+  if (faltaErr) throw faltaErr
+
   const { error } = await supabase.from('alunos').delete().eq('id', id)
   if (error) throw error
 }

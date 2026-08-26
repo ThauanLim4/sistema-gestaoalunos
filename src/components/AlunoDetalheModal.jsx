@@ -61,7 +61,11 @@ export default function AlunoDetalheModal({ aluno, faltasIniciais = [], onClose,
       onClose()
     } catch (err) {
       console.error(err)
-      alert('Não foi possível excluir o aluno. Verifique as permissões no banco.')
+      alert(
+        'Erro ao excluir o aluno: ' +
+          (err?.message ||
+            'verifique permissões e relacionamentos (contratos/faltas) no banco.')
+      )
       setExcluindo(false)
     }
   }
