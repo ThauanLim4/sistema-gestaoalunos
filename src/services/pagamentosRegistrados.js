@@ -1,6 +1,6 @@
-import { supabase as supabaseBrowser } from '../lib/supabaseClient.js'
+import { getBrowserClient } from '../lib/supabaseClient.js'
 
-export async function listarPagamentosRegistrados(contratoId, supabase = supabaseBrowser) {
+export async function listarPagamentosRegistrados(contratoId, supabase = getBrowserClient()) {
   const { data, error } = await supabase
     .from('historico_pagamentos')
     .select('id, pagamento_id, data, valor, metodo_pagamento, criado_em')
@@ -11,7 +11,7 @@ export async function listarPagamentosRegistrados(contratoId, supabase = supabas
   return data ?? []
 }
 
-export async function criarPagamentoRegistrado(dados, supabase = supabaseBrowser) {
+export async function criarPagamentoRegistrado(dados, supabase = getBrowserClient()) {
   const { data, error } = await supabase
     .from('historico_pagamentos')
     .insert({
@@ -27,7 +27,7 @@ export async function criarPagamentoRegistrado(dados, supabase = supabaseBrowser
   return data
 }
 
-export async function atualizarPagamentoRegistrado(id, dados, supabase = supabaseBrowser) {
+export async function atualizarPagamentoRegistrado(id, dados, supabase = getBrowserClient()) {
   const { data, error } = await supabase
     .from('historico_pagamentos')
     .update({

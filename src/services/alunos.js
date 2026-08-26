@@ -1,6 +1,6 @@
-import { supabase as supabaseBrowser } from '../lib/supabaseClient.js'
+import { getBrowserClient } from '../lib/supabaseClient.js'
 
-export async function listarAlunos(supabase = supabaseBrowser) {
+export async function listarAlunos(supabase = getBrowserClient()) {
   const [alunosResp, pagamentosResp] = await Promise.all([
     supabase
       .from('alunos')
@@ -43,7 +43,7 @@ export async function listarAlunos(supabase = supabaseBrowser) {
   })
 }
 
-export async function criarAluno(dados, supabase = supabaseBrowser) {
+export async function criarAluno(dados, supabase = getBrowserClient()) {
   const { data, error } = await supabase
     .from('alunos')
     .insert({
@@ -63,7 +63,7 @@ export async function criarAluno(dados, supabase = supabaseBrowser) {
   return data
 }
 
-export async function atualizarAluno(id, dados, supabase = supabaseBrowser) {
+export async function atualizarAluno(id, dados, supabase = getBrowserClient()) {
   const { data, error } = await supabase
     .from('alunos')
     .update({
@@ -84,7 +84,7 @@ export async function atualizarAluno(id, dados, supabase = supabaseBrowser) {
   return data
 }
 
-export async function excluirAluno(id, supabase = supabaseBrowser) {
+export async function excluirAluno(id, supabase = getBrowserClient()) {
   const { error } = await supabase.from('alunos').delete().eq('id', id)
   if (error) throw error
 }

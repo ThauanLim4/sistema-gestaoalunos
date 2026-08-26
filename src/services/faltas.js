@@ -1,6 +1,6 @@
-import { supabase as supabaseBrowser } from '../lib/supabaseClient.js'
+import { getBrowserClient } from '../lib/supabaseClient.js'
 
-export async function listarFaltas(alunoId, supabase = supabaseBrowser) {
+export async function listarFaltas(alunoId, supabase = getBrowserClient()) {
   const { data, error } = await supabase
     .from('faltas')
     .select('id, aluno_id, numero_aula, data, justificado, criado_em')
@@ -11,7 +11,7 @@ export async function listarFaltas(alunoId, supabase = supabaseBrowser) {
   return data ?? []
 }
 
-export async function criarFalta(dados, supabase = supabaseBrowser) {
+export async function criarFalta(dados, supabase = getBrowserClient()) {
   const { data, error } = await supabase
     .from('faltas')
     .insert({
@@ -27,7 +27,7 @@ export async function criarFalta(dados, supabase = supabaseBrowser) {
   return data
 }
 
-export async function atualizarFalta(id, dados, supabase = supabaseBrowser) {
+export async function atualizarFalta(id, dados, supabase = getBrowserClient()) {
   const { data, error } = await supabase
     .from('faltas')
     .update({

@@ -1,6 +1,6 @@
-import { supabase as supabaseBrowser } from '../lib/supabaseClient.js'
+import { getBrowserClient } from '../lib/supabaseClient.js'
 
-export async function listarContratos(supabase = supabaseBrowser) {
+export async function listarContratos(supabase = getBrowserClient()) {
   const { data, error } = await supabase
     .from('pagamentos')
     .select('id, aluno_id, valor, vencimento_dia, status, criado_em')
@@ -10,7 +10,7 @@ export async function listarContratos(supabase = supabaseBrowser) {
   return data ?? []
 }
 
-export async function criarContrato(dados, supabase = supabaseBrowser) {
+export async function criarContrato(dados, supabase = getBrowserClient()) {
   const { data, error } = await supabase
     .from('pagamentos')
     .insert({
@@ -26,7 +26,7 @@ export async function criarContrato(dados, supabase = supabaseBrowser) {
   return data
 }
 
-export async function atualizarContrato(id, dados, supabase = supabaseBrowser) {
+export async function atualizarContrato(id, dados, supabase = getBrowserClient()) {
   const { data, error } = await supabase
     .from('pagamentos')
     .update({
