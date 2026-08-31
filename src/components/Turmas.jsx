@@ -8,11 +8,11 @@ import TurmaDetalheModal from './TurmaDetalheModal.jsx'
 const FILTROS = [
   { id: 'todas', label: 'Todas' },
   { id: 'ativa', label: 'Ativa' },
-  { id: 'inativa', label: 'Inativa' },
+  { id: 'finalizada', label: 'Finalizada' },
 ]
 
-const TOM_STATUS_TURMA = { ativa: 'green', inativa: 'red' }
-const TEXTO_STATUS_TURMA = { ativa: 'Ativa', inativa: 'Inativa' }
+const TOM_STATUS_TURMA = { ativa: 'green', finalizada: 'blue' }
+const TEXTO_STATUS_TURMA = { ativa: 'Ativa', finalizada: 'Finalizada' }
 
 export default function Turmas({ turmas, alunos, carregando, erro, onAtualizar }) {
   const [busca, setBusca] = useState('')
