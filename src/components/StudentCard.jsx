@@ -1,4 +1,4 @@
-import { Mail, Phone, MapPin, Cake, CalendarDays } from 'lucide-react'
+import { Mail, Phone, MapPin, Cake, CalendarDays, Users } from 'lucide-react'
 import { Badge } from './ui.jsx'
 import {
   iniciais,
@@ -44,6 +44,12 @@ export default function StudentCard({ aluno, onSelecionar }) {
         <div className="flex items-center gap-2 text-gray-500">
           <Phone size={16} className="text-purple-400 shrink-0" />
           <span className="truncate">{aluno.telefone || '—'}</span>
+        </div>
+        <div className="flex items-center gap-2 text-gray-500">
+          <Users size={16} className="text-purple-400 shrink-0" />
+          <span className="truncate">
+            {aluno.turma ? `Turma ${aluno.turma.numero_turma}` : 'Sem turma'}
+          </span>
         </div>
         <div className="flex items-center gap-2 text-gray-500">
           <Mail size={16} className="text-purple-400 shrink-0" />

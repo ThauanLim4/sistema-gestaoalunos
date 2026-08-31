@@ -1,8 +1,9 @@
-import { LayoutDashboard, Users, GraduationCap, Wallet } from 'lucide-react'
+import { LayoutDashboard, Users, GraduationCap, Wallet, School } from 'lucide-react'
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Painel', icon: LayoutDashboard },
   { id: 'alunos', label: 'Alunos', icon: Users },
+  { id: 'turmas', label: 'Turmas', icon: School },
   { id: 'financeiro', label: 'Financeiro', icon: Wallet },
 ]
 

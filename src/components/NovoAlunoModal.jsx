@@ -11,7 +11,7 @@ function formatarCpf(valor) {
     .replace(/(\d{3})(\d{1,2})$/, '$1-$2')
 }
 
-export default function NovoAlunoModal({ aluno, onClose, onCriado }) {
+export default function NovoAlunoModal({ aluno, turmas = [], onClose, onCriado }) {
   const [nome, setNome] = useState(aluno?.nome ?? '')
   const [cpf, setCpf] = useState(aluno?.cpf ?? '')
   const [telefone, setTelefone] = useState(aluno?.telefone ?? '')
@@ -20,6 +20,7 @@ export default function NovoAlunoModal({ aluno, onClose, onCriado }) {
   const [dataNascimento, setDataNascimento] = useState(aluno?.data_nascimento ?? '')
   const [dataMatricula, setDataMatricula] = useState(aluno?.data_matricula ?? '')
   const [status, setStatus] = useState(aluno?.status ?? 'cursando')
+  const [turmaId, setTurmaId] = useState(aluno?.turma_id ?? '')
   const [salvando, setSalvando] = useState(false)
   const [erro, setErro] = useState(null)
 
@@ -38,6 +39,7 @@ export default function NovoAlunoModal({ aluno, onClose, onCriado }) {
         data_nascimento: dataNascimento || null,
         data_matricula: dataMatricula || null,
         status,
+        turma_id: turmaId || null,
       }
       const salvo = aluno
         ? await atualizarAluno(aluno.id, payload)
@@ -123,6 +125,22 @@ export default function NovoAlunoModal({ aluno, onClose, onCriado }) {
               >
                 <option value="cursando">Cursando</option>
                 <option value="desistente">Desistente</option>
+              </select>
+            </label>
+            <label className="block">
+              <span className="block text-sm font-medium text-gray-600 mb-1">Turma</span>
+              <select
+                value={turmaId}
+                onChange={(e) => setTurmaId(e.target.value)}
+                className={inputClass}
+              >
+                <option value="">Sem turma</option>
+                {turmas.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    Turma {t.numero_turma}
+                    {t.turma_cidade ? ` - ${t.turma_cidade}` : ''}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="block">

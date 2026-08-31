@@ -1,26 +1,33 @@
 import { getBrowserClient } from '../lib/supabaseClient.js'
 
 export async function listarAlunos(supabase = getBrowserClient()) {
-  const [alunosResp, pagamentosResp] = await Promise.all([
+  const [alunosResp, pagamentosResp, turmasResp] = await Promise.all([
     supabase
       .from('alunos')
       .select(
-        'id, nome, status, cpf, telefone, email, endereco, data_nascimento, data_matricula'
+        'id, nome, status, cpf, telefone, email, endereco, data_nascimento, data_matricula, turma_id'
       ),
     supabase
       .from('pagamentos')
       .select('id, aluno_id, status, valor, vencimento_dia'),
+    supabase
+      .from('turmas')
+      .select('id, turma_cidade, numero_turma, dia_turma, status'),
   ])
 
   if (alunosResp.error) throw alunosResp.error
   if (pagamentosResp.error) throw pagamentosResp.error
+  if (turmasResp.error) throw turmasResp.error
 
   const pagamentosPorAluno = new Map(
     (pagamentosResp.data ?? []).map((pagamento) => [pagamento.aluno_id, pagamento])
   )
 
+  const turmasPorId = new Map((turmasResp.data ?? []).map((t) => [t.id, t]))
+
   return (alunosResp.data ?? []).map((aluno) => {
     const pagamento = pagamentosPorAluno.get(aluno.id) ?? null
+    const turma = aluno.turma_id ? (turmasPorId.get(aluno.turma_id) ?? null) : null
 
     return {
       id: aluno.id,
@@ -32,6 +39,16 @@ export async function listarAlunos(supabase = getBrowserClient()) {
       endereco: aluno.endereco,
       data_nascimento: aluno.data_nascimento,
       data_matricula: aluno.data_matricula,
+      turma_id: aluno.turma_id,
+      turma: turma
+        ? {
+            id: turma.id,
+            numero_turma: turma.numero_turma,
+            turma_cidade: turma.turma_cidade,
+            dia_turma: turma.dia_turma,
+            status: turma.status,
+          }
+        : null,
       pagamento: pagamento
         ? {
             status: pagamento.status,
@@ -55,8 +72,9 @@ export async function criarAluno(dados, supabase = getBrowserClient()) {
       data_nascimento: dados.data_nascimento,
       data_matricula: dados.data_matricula,
       status: dados.status ?? 'ativo',
+      turma_id: dados.turma_id ?? null,
     })
-    .select('id, nome, status')
+    .select('id, nome, status, turma_id')
     .single()
 
   if (error) throw error
@@ -75,9 +93,10 @@ export async function atualizarAluno(id, dados, supabase = getBrowserClient()) {
       data_nascimento: dados.data_nascimento,
       data_matricula: dados.data_matricula,
       status: dados.status ?? 'cursando',
+      turma_id: dados.turma_id ?? null,
     })
     .eq('id', id)
-    .select('id, nome, status, cpf, telefone, email, endereco, data_nascimento, data_matricula')
+    .select('id, nome, status, cpf, telefone, email, endereco, data_nascimento, data_matricula, turma_id')
     .single()
 
   if (error) throw error

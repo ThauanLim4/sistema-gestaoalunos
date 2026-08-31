@@ -5,13 +5,16 @@ import { useRouter } from 'next/navigation'
 import { Menu } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient.js'
 import { listarAlunos } from '../services/alunos.js'
+import { listarTurmas } from '../services/turmas.js'
 import Sidebar from './Sidebar.jsx'
 import Dashboard from './Dashboard.jsx'
 import Alunos from './Alunos.jsx'
+import Turmas from './Turmas.jsx'
 import Financeiro from './Financeiro.jsx'
 
 export default function App({
   alunosIniciais = [],
+  turmasIniciais = [],
   erroInicial = null,
   usuarioInicial = null,
   contratoIniciais = [],
@@ -19,6 +22,7 @@ export default function App({
   const router = useRouter()
   const [tela, setTela] = useState('dashboard')
   const [alunos, setAlunos] = useState(alunosIniciais)
+  const [turmas, setTurmas] = useState(turmasIniciais)
   const [carregando, setCarregando] = useState(false)
   const [erro, setErro] = useState(erroInicial)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -26,8 +30,12 @@ export default function App({
   const carregar = useCallback(async () => {
     setCarregando(true)
     try {
-      const dados = await listarAlunos()
-      setAlunos(Array.isArray(dados) ? dados : [])
+      const [dadosAlunos, dadosTurmas] = await Promise.all([
+        listarAlunos(),
+        listarTurmas(),
+      ])
+      setAlunos(Array.isArray(dadosAlunos) ? dadosAlunos : [])
+      setTurmas(Array.isArray(dadosTurmas) ? dadosTurmas : [])
       setErro(null)
     } catch (e) {
       console.error(e)
@@ -76,9 +84,18 @@ export default function App({
                 erro={erro}
                 onAtualizar={carregar}
               />
+            ) : tela === 'turmas' ? (
+              <Turmas
+                turmas={turmas}
+                alunos={alunos}
+                carregando={carregando}
+                erro={erro}
+                onAtualizar={carregar}
+              />
             ) : tela === 'alunos' ? (
               <Alunos
                 alunos={alunos}
+                turmas={turmas}
                 carregando={carregando}
                 erro={erro}
                 onAtualizar={carregar}

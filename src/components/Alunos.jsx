@@ -13,7 +13,7 @@ const FILTROS = [
   { id: 'desistente', label: 'Desistente' },
 ]
 
-export default function Alunos({ alunos, carregando, erro, onAtualizar }) {
+export default function Alunos({ alunos, turmas = [], carregando, erro, onAtualizar }) {
   const [busca, setBusca] = useState('')
   const [filtro, setFiltro] = useState('todos')
   const [modalAberto, setModalAberto] = useState(false)
@@ -122,6 +122,7 @@ export default function Alunos({ alunos, carregando, erro, onAtualizar }) {
 
       {modalAberto && (
         <NovoAlunoModal
+          turmas={turmas}
           onClose={() => setModalAberto(false)}
           onCriado={() => {
             setModalAberto(false)
@@ -134,6 +135,7 @@ export default function Alunos({ alunos, carregando, erro, onAtualizar }) {
         <AlunoDetalheModal
           aluno={alunoSelecionado}
           faltasIniciais={faltasDoSelecionado}
+          turmas={turmas}
           onClose={() => {
             setAlunoSelecionado(null)
             setFaltasDoSelecionado([])

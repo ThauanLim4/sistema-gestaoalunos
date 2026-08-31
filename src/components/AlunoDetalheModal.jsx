@@ -9,6 +9,7 @@ import {
   Cake,
   CalendarDays,
   Hash,
+  Users,
   Pencil,
   Trash2,
 } from 'lucide-react'
@@ -38,7 +39,7 @@ function Campo({ icone: Icon, label, valor }) {
   )
 }
 
-export default function AlunoDetalheModal({ aluno, faltasIniciais = [], onClose, onAtualizar }) {
+export default function AlunoDetalheModal({ aluno, faltasIniciais = [], turmas = [], onClose, onAtualizar }) {
   const [alunoAtual, setAlunoAtual] = useState(aluno)
   const [faltas, setFaltas] = useState(faltasIniciais)
   const [modalFalta, setModalFalta] = useState(false)
@@ -125,6 +126,17 @@ export default function AlunoDetalheModal({ aluno, faltasIniciais = [], onClose,
             <Campo icone={Cake} label="Data de nascimento" valor={formatarData(alunoAtual.data_nascimento)} />
             <Campo icone={CalendarDays} label="Data de matrícula" valor={formatarData(alunoAtual.data_matricula)} />
             <Campo icone={MapPin} label="Endereço" valor={alunoAtual.endereco} />
+            <Campo
+              icone={Users}
+              label="Turma"
+              valor={
+                alunoAtual.turma
+                  ? `Turma ${alunoAtual.turma.numero_turma}${
+                      alunoAtual.turma.turma_cidade ? ` - ${alunoAtual.turma.turma_cidade}` : ''
+                    }`
+                  : '—'
+              }
+            />
           </div>
 
           <div className="border-t border-purple-100 pt-5">
@@ -203,6 +215,7 @@ export default function AlunoDetalheModal({ aluno, faltasIniciais = [], onClose,
       {modalEditar && (
         <NovoAlunoModal
           aluno={alunoAtual}
+          turmas={turmas}
           onClose={() => setModalEditar(false)}
           onCriado={(salvo) => {
             setModalEditar(false)
