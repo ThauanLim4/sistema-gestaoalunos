@@ -3,20 +3,35 @@ import { X, Pencil, Trash2, MapPin, CalendarDays, Users, Plus } from 'lucide-rea
 import { Badge } from './ui.jsx'
 import { formatarData } from '../lib/format.js'
 import { excluirTurma } from '../services/turmas.js'
+import { listarFaltas } from '../services/faltas.js'
 import { supabase } from '../lib/supabaseClient.js'
 import TurmaModal from './TurmaModal.jsx'
 import IncluirAlunoTurmaModal from './IncluirAlunoTurmaModal.jsx'
+import AlunoDetalheModal from './AlunoDetalheModal.jsx'
 
 const TOM_STATUS_TURMA = { ativa: 'green', inativa: 'red' }
 const TEXTO_STATUS_TURMA = { ativa: 'Ativa', inativa: 'Inativa' }
 
-export default function TurmaDetalheModal({ turma, alunosNaTurma = [], alunos = [], onClose, onAtualizar }) {
+export default function TurmaDetalheModal({ turma, alunosNaTurma = [], alunos = [], turmas = [], onClose, onAtualizar }) {
   const [modalEditar, setModalEditar] = useState(false)
   const [modalIncluir, setModalIncluir] = useState(false)
   const [excluindo, setExcluindo] = useState(false)
+  const [alunoSelecionado, setAlunoSelecionado] = useState(null)
+  const [faltasDoSelecionado, setFaltasDoSelecionado] = useState([])
 
   const idsNaTurma = new Set(alunosNaTurma.map((a) => a.id))
   const alunosDisponiveis = alunos.filter((a) => !idsNaTurma.has(a.id))
+
+  async function abrirAluno(aluno) {
+    try {
+      const f = await listarFaltas(aluno.id, supabase)
+      setFaltasDoSelecionado(Array.isArray(f) ? f : [])
+    } catch (e) {
+      console.error(e)
+      setFaltasDoSelecionado([])
+    }
+    setAlunoSelecionado(aluno)
+  }
 
   async function handleExcluir() {
     if (!confirm(`Excluir a turma ${turma.numero_turma}? Os alunos serão desvinculados.`)) return
@@ -118,15 +133,20 @@ export default function TurmaDetalheModal({ turma, alunosNaTurma = [], alunos = 
             ) : (
               <div className="space-y-2">
                 {alunosNaTurma.map((aluno) => (
-                  <div key={aluno.id} className="rounded-xl border border-purple-100 p-3 flex items-center gap-3">
+                  <button
+                    key={aluno.id}
+                    type="button"
+                    onClick={() => abrirAluno(aluno)}
+                    className="group w-full text-left rounded-xl border border-purple-100 p-3 flex items-center gap-3 hover:border-purple-300 hover:bg-purple-50/50 transition"
+                  >
                     <div className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center font-semibold text-xs shrink-0">
                       {aluno.nome?.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('')}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium text-gray-700 truncate">{aluno.nome}</p>
+                      <p className="font-medium text-gray-700 truncate group-hover:text-purple-700">{aluno.nome}</p>
                       <p className="text-xs text-gray-400 truncate">{aluno.email || 'Sem e-mail'}</p>
                     </div>
-                  </div>
+                  </button>
                 ))}
               </div>
             )}
@@ -154,6 +174,19 @@ export default function TurmaDetalheModal({ turma, alunosNaTurma = [], alunos = 
             setModalIncluir(false)
             onAtualizar?.()
           }}
+        />
+      )}
+
+      {alunoSelecionado && (
+        <AlunoDetalheModal
+          aluno={alunoSelecionado}
+          faltasIniciais={faltasDoSelecionado}
+          turmas={turmas}
+          onClose={() => {
+            setAlunoSelecionado(null)
+            setFaltasDoSelecionado([])
+          }}
+          onAtualizar={onAtualizar}
         />
       )}
     </div>

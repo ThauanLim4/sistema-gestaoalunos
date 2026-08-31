@@ -164,6 +164,7 @@ export default function Turmas({ turmas, alunos, carregando, erro, onAtualizar }
           turma={turmaSelecionada}
           alunosNaTurma={alunosPorTurma.get(turmaSelecionada.id) ?? []}
           alunos={alunos}
+          turmas={turmas}
           onClose={() => setTurmaSelecionada(null)}
           onAtualizar={onAtualizar}
         />
