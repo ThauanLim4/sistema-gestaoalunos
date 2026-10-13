@@ -124,6 +124,7 @@ export default function NovoAlunoModal({ aluno, turmas = [], onClose, onCriado }
                 className={inputClass}
               >
                 <option value="cursando">Cursando</option>
+                <option value="concluinte">Concluinte</option>
                 <option value="desistente">Desistente</option>
               </select>
             </label>

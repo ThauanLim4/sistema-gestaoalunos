@@ -14,7 +14,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { Badge } from './ui.jsx'
-import { listarFaltas } from '../services/faltas.js'
+import { listarFaltas, excluirFalta } from '../services/faltas.js'
 import { excluirAluno } from '../services/alunos.js'
 import { supabase } from '../lib/supabaseClient.js'
 import {
@@ -46,10 +46,26 @@ export default function AlunoDetalheModal({ aluno, faltasIniciais = [], turmas =
   const [faltaEditando, setFaltaEditando] = useState(null)
   const [modalEditar, setModalEditar] = useState(false)
   const [excluindo, setExcluindo] = useState(false)
+  const [excluindoFaltaId, setExcluindoFaltaId] = useState(null)
 
   async function recarregarFaltas() {
     const dados = await listarFaltas(alunoAtual.id, supabase)
     setFaltas(Array.isArray(dados) ? dados : [])
+  }
+
+  async function handleExcluirFalta(falta) {
+    if (!confirm(`Remover a falta da aula nº ${falta.numero_aula}?`)) return
+    setExcluindoFaltaId(falta.id)
+    try {
+      await excluirFalta(falta.id, supabase)
+      await recarregarFaltas()
+      onAtualizar?.()
+    } catch (err) {
+      console.error(err)
+      alert('Erro ao remover a falta: ' + (err?.message || 'Verifique as permissões no banco.'))
+    } finally {
+      setExcluindoFaltaId(null)
+    }
   }
 
   async function handleExcluir() {
@@ -170,6 +186,14 @@ export default function AlunoDetalheModal({ aluno, faltasIniciais = [], turmas =
                           className="p-1 rounded-md text-purple-600 hover:bg-purple-50 transition"
                         >
                           <Pencil size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleExcluirFalta(falta)}
+                          disabled={excluindoFaltaId === falta.id}
+                          title="Remover falta"
+                          className="p-1 rounded-md text-red-500 hover:bg-red-50 transition disabled:opacity-50"
+                        >
+                          <Trash2 size={14} />
                         </button>
                       </div>
                     </div>

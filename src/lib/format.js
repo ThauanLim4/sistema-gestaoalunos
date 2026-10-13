@@ -59,6 +59,7 @@ export function situacaoAluno(aluno) {
 export const TEXTO_SITUACAO_ALUNO = {
   cursando: 'Cursando',
   desistente: 'Desistente',
+  concluinte: 'Concluinte',
   ativo: 'Cursando',
   inativo: 'Desistente',
 }
@@ -66,6 +67,19 @@ export const TEXTO_SITUACAO_ALUNO = {
 export const TOM_SITUACAO_ALUNO = {
   cursando: 'green',
   desistente: 'red',
+  concluinte: 'purple',
   ativo: 'green',
   inativo: 'red',
+}
+
+export const TEXTO_STATUS_TURMA = {
+  ativa: 'Ativa',
+  inativa: 'Inativa',
+  concluida: 'Concluída',
+}
+
+export const TOM_STATUS_TURMA = {
+  ativa: 'green',
+  inativa: 'red',
+  concluida: 'purple',
 }

@@ -1,24 +1,26 @@
 import { useMemo, useState } from 'react'
 import { Search, Plus, RefreshCw, MapPin, CalendarDays, Users } from 'lucide-react'
 import { inputClass, Badge } from './ui.jsx'
-import { formatarData } from '../lib/format.js'
+import { formatarData, TEXTO_STATUS_TURMA, TOM_STATUS_TURMA } from '../lib/format.js'
+import { contarFaltasPorAluno } from '../services/faltas.js'
+import { supabase } from '../lib/supabaseClient.js'
 import TurmaModal from './TurmaModal.jsx'
 import TurmaDetalheModal from './TurmaDetalheModal.jsx'
 
 const FILTROS = [
   { id: 'todas', label: 'Todas' },
   { id: 'ativa', label: 'Ativa' },
-  { id: 'finalizada', label: 'Finalizada' },
+  { id: 'inativa', label: 'Inativa' },
+  { id: 'concluida', label: 'Concluída' },
 ]
-
-const TOM_STATUS_TURMA = { ativa: 'green', finalizada: 'blue' }
-const TEXTO_STATUS_TURMA = { ativa: 'Ativa', finalizada: 'Finalizada' }
 
 export default function Turmas({ turmas, alunos, carregando, erro, onAtualizar }) {
   const [busca, setBusca] = useState('')
   const [filtro, setFiltro] = useState('todas')
   const [modalCriar, setModalCriar] = useState(false)
   const [turmaSelecionada, setTurmaSelecionada] = useState(null)
+  const [faltasPorAluno, setFaltasPorAluno] = useState(null)
+  const [carregandoContagem, setCarregandoContagem] = useState(false)
 
   const alunosPorTurma = useMemo(() => {
     const mapa = new Map()
@@ -29,8 +31,43 @@ export default function Turmas({ turmas, alunos, carregando, erro, onAtualizar }
         mapa.set(aluno.turma_id, lista)
       }
     }
+    for (const lista of mapa.values()) {
+      lista.sort((a, b) => (a.nome ?? '').localeCompare(b.nome ?? '', 'pt-BR'))
+    }
     return mapa
   }, [alunos])
+
+  async function carregarContagem(turma) {
+    const ids = alunosPorTurma.get(turma.id)?.map((a) => a.id) ?? []
+    try {
+      const contagem = await contarFaltasPorAluno(ids, supabase)
+      setFaltasPorAluno(contagem)
+    } catch (e) {
+      console.error(e)
+      setFaltasPorAluno({})
+    }
+  }
+
+  async function abrirTurma(turma) {
+    setTurmaSelecionada(turma)
+    setCarregandoContagem(true)
+    await carregarContagem(turma)
+    setCarregandoContagem(false)
+  }
+
+  async function fecharTurma() {
+    setTurmaSelecionada(null)
+    setFaltasPorAluno(null)
+  }
+
+  async function handleAtualizar() {
+    await onAtualizar?.()
+    if (turmaSelecionada) {
+      setCarregandoContagem(true)
+      await carregarContagem(turmaSelecionada)
+      setCarregandoContagem(false)
+    }
+  }
 
   const turmasFiltradas = useMemo(() => {
     const termo = busca.trim().toLowerCase()
@@ -54,7 +91,7 @@ export default function Turmas({ turmas, alunos, carregando, erro, onAtualizar }
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={onAtualizar}
+            onClick={handleAtualizar}
             disabled={carregando}
             className="inline-flex items-center gap-2 text-sm text-purple-600 px-3 py-2.5 rounded-xl border border-purple-100 transition hover:bg-purple-50 disabled:opacity-50"
           >
@@ -118,7 +155,7 @@ export default function Turmas({ turmas, alunos, carregando, erro, onAtualizar }
             <button
               key={turma.id}
               type="button"
-              onClick={() => setTurmaSelecionada(turma)}
+              onClick={() => abrirTurma(turma)}
               className="group text-left w-full bg-white rounded-2xl border border-purple-100 p-5 shadow-sm hover:shadow-md hover:border-purple-200 transition"
             >
               <div className="flex items-center justify-between mb-3">
@@ -165,8 +202,10 @@ export default function Turmas({ turmas, alunos, carregando, erro, onAtualizar }
           alunosNaTurma={alunosPorTurma.get(turmaSelecionada.id) ?? []}
           alunos={alunos}
           turmas={turmas}
-          onClose={() => setTurmaSelecionada(null)}
-          onAtualizar={onAtualizar}
+          faltasPorAluno={faltasPorAluno}
+          carregandoContagem={carregandoContagem}
+          onClose={fecharTurma}
+          onAtualizar={handleAtualizar}
         />
       )}
     </div>

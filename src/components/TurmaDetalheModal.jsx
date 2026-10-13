@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { X, Pencil, Trash2, MapPin, CalendarDays, Users, Plus } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import Image from 'next/image'
+import { X, Pencil, Trash2, MapPin, CalendarDays, Users, Plus, Filter, Loader2 } from 'lucide-react'
 import { Badge } from './ui.jsx'
-import { formatarData } from '../lib/format.js'
+import { formatarData, TEXTO_STATUS_TURMA, TOM_STATUS_TURMA } from '../lib/format.js'
 import { excluirTurma } from '../services/turmas.js'
 import { listarFaltas } from '../services/faltas.js'
 import { supabase } from '../lib/supabaseClient.js'
@@ -9,18 +10,53 @@ import TurmaModal from './TurmaModal.jsx'
 import IncluirAlunoTurmaModal from './IncluirAlunoTurmaModal.jsx'
 import AlunoDetalheModal from './AlunoDetalheModal.jsx'
 
-const TOM_STATUS_TURMA = { ativa: 'green', inativa: 'red' }
-const TEXTO_STATUS_TURMA = { ativa: 'Ativa', inativa: 'Inativa' }
+const FILTROS_FALTAS = [
+  { id: 'todas', label: 'Todos os alunos' },
+  { id: 'nome', label: 'Ordem alfabética' },
+  { id: 'mais', label: 'Mais faltas' },
+  { id: 'menos', label: 'Menos faltas' },
+]
 
-export default function TurmaDetalheModal({ turma, alunosNaTurma = [], alunos = [], turmas = [], onClose, onAtualizar }) {
+export default function TurmaDetalheModal({
+  turma,
+  alunosNaTurma = [],
+  alunos = [],
+  turmas = [],
+  faltasPorAluno,
+  carregandoContagem = false,
+  onClose,
+  onAtualizar,
+}) {
   const [modalEditar, setModalEditar] = useState(false)
   const [modalIncluir, setModalIncluir] = useState(false)
   const [excluindo, setExcluindo] = useState(false)
   const [alunoSelecionado, setAlunoSelecionado] = useState(null)
   const [faltasDoSelecionado, setFaltasDoSelecionado] = useState([])
+  const [filtroFaltas, setFiltroFaltas] = useState('todas')
+  const [menuFiltroAberto, setMenuFiltroAberto] = useState(false)
 
   const idsNaTurma = new Set(alunosNaTurma.map((a) => a.id))
   const alunosDisponiveis = alunos.filter((a) => !idsNaTurma.has(a.id))
+
+  const alunosExibidos = useMemo(() => {
+    if (filtroFaltas === 'todas' || !faltasPorAluno) return alunosNaTurma
+    const base = [...alunosNaTurma]
+    if (filtroFaltas === 'nome') {
+      base.sort((a, b) => (a.nome ?? '').localeCompare(b.nome ?? '', 'pt-BR'))
+      return base
+    }
+    base.sort((a, b) => {
+      const ca = faltasPorAluno[a.id] ?? 0
+      const cb = faltasPorAluno[b.id] ?? 0
+      return filtroFaltas === 'mais' ? cb - ca : ca - cb
+    })
+    return base
+  }, [alunosNaTurma, filtroFaltas, faltasPorAluno])
+
+  function selecionarFiltro(valor) {
+    setMenuFiltroAberto(false)
+    setFiltroFaltas(valor)
+  }
 
   async function abrirAluno(aluno) {
     try {
@@ -82,6 +118,17 @@ export default function TurmaDetalheModal({ turma, alunosNaTurma = [], alunos = 
           </div>
         </div>
 
+        <div className="relative h-40 w-full sm:h-48">
+          <Image
+            src="/computador_vintage_plano_de_fundo_do_modal_turmas_fundo_roxo.png"
+            alt="Fundo decorativo da turma"
+            fill
+            priority
+            sizes="(max-width: 672px) 100vw, 672px"
+            className="object-cover"
+          />
+        </div>
+
         <div className="p-6 space-y-6">
           <div className="flex items-center gap-3">
             <Badge tone={TOM_STATUS_TURMA[turma.status] ?? 'gray'}>
@@ -120,34 +167,84 @@ export default function TurmaDetalheModal({ turma, alunosNaTurma = [], alunos = 
                 <h4 className="font-semibold">Alunos na turma</h4>
                 <span className="text-xs text-gray-400">({alunosNaTurma.length})</span>
               </div>
-              <button
-                onClick={() => setModalIncluir(true)}
-                className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-xl text-sm font-medium transition"
-              >
-                <Plus size={16} /> Incluir aluno
-              </button>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  {carregandoContagem ? (
+                      <span className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-purple-100 text-purple-400">
+                        <Loader2 size={16} className="animate-spin" /> Contando...
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => setMenuFiltroAberto((v) => !v)}
+                        title="Filtrar por faltas"
+                        className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border transition ${
+                          filtroFaltas === 'todas'
+                            ? 'border-purple-100 text-purple-600 hover:bg-purple-50'
+                            : 'border-purple-300 bg-purple-50 text-purple-700'
+                        }`}
+                      >
+                        <Filter size={16} />
+                        {FILTROS_FALTAS.find((f) => f.id === filtroFaltas)?.label}
+                      </button>
+                    )}
+                  {menuFiltroAberto && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={() => setMenuFiltroAberto(false)} />
+                      <div className="absolute right-0 mt-1 z-20 w-48 rounded-xl border border-purple-100 bg-white shadow-lg p-1">
+                        {FILTROS_FALTAS.map((opcao) => (
+                          <button
+                            key={opcao.id}
+                            onClick={() => selecionarFiltro(opcao.id)}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${
+                              filtroFaltas === opcao.id
+                                ? 'bg-purple-50 text-purple-700 font-medium'
+                                : 'text-gray-600 hover:bg-purple-50'
+                            }`}
+                          >
+                            {opcao.label}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+                <button
+                  onClick={() => setModalIncluir(true)}
+                  className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-xl text-sm font-medium transition"
+                >
+                  <Plus size={16} /> Incluir aluno
+                </button>
+              </div>
             </div>
 
             {alunosNaTurma.length === 0 ? (
               <p className="text-sm text-gray-400">Nenhum aluno nesta turma.</p>
             ) : (
               <div className="space-y-2">
-                {alunosNaTurma.map((aluno) => (
-                  <button
-                    key={aluno.id}
-                    type="button"
-                    onClick={() => abrirAluno(aluno)}
-                    className="group w-full text-left rounded-xl border border-purple-100 p-3 flex items-center gap-3 hover:border-purple-300 hover:bg-purple-50/50 transition"
-                  >
-                    <div className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center font-semibold text-xs shrink-0">
-                      {aluno.nome?.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('')}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-medium text-gray-700 truncate group-hover:text-purple-700">{aluno.nome}</p>
-                      <p className="text-xs text-gray-400 truncate">{aluno.email || 'Sem e-mail'}</p>
-                    </div>
-                  </button>
-                ))}
+                {alunosExibidos.map((aluno) => {
+                  const total = faltasPorAluno ? (faltasPorAluno[aluno.id] ?? 0) : null
+                  return (
+                    <button
+                      key={aluno.id}
+                      type="button"
+                      onClick={() => abrirAluno(aluno)}
+                      className="group w-full text-left rounded-xl border border-purple-100 p-3 flex items-center gap-3 hover:border-purple-300 hover:bg-purple-50/50 transition"
+                    >
+                      <div className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center font-semibold text-xs shrink-0">
+                        {aluno.nome?.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('')}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-medium text-gray-700 truncate group-hover:text-purple-700">{aluno.nome}</p>
+                        <p className="text-xs text-gray-400 truncate">{aluno.email || 'Sem e-mail'}</p>
+                      </div>
+                      {total != null && (
+                        <span className="ml-auto shrink-0 text-xs font-medium text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full">
+                          {total} falta{total === 1 ? '' : 's'}
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
             )}
           </div>

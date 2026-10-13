@@ -98,6 +98,7 @@ export default function TurmaModal({ turma, onClose, onCriado }) {
             >
               <option value="ativa">Ativa</option>
               <option value="inativa">Inativa</option>
+              <option value="concluida">Concluída</option>
             </select>
           </label>
 

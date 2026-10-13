@@ -10,6 +10,7 @@ import { listarFaltas } from '../services/faltas.js'
 const FILTROS = [
   { id: 'todos', label: 'Todos' },
   { id: 'cursando', label: 'Cursando' },
+  { id: 'concluinte', label: 'Concluinte' },
   { id: 'desistente', label: 'Desistente' },
 ]
 
