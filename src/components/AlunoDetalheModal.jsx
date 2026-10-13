@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Image from 'next/image'
 import {
   X,
   CalendarX,
@@ -118,6 +119,17 @@ export default function AlunoDetalheModal({ aluno, faltasIniciais = [], turmas =
               <X size={20} />
             </button>
           </div>
+        </div>
+
+        <div className="relative h-40 w-full sm:h-48">
+          <Image
+            src="/usuario_fundo_modal_aluno.png"
+            alt="Fundo decorativo do aluno"
+            fill
+            priority
+            sizes="(max-width: 672px) 100vw, 672px"
+            className="object-cover"
+          />
         </div>
 
         <div className="p-6 space-y-6">
