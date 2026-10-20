@@ -2,7 +2,14 @@ import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import { X, Pencil, Trash2, MapPin, CalendarDays, Users, Plus, Filter, Loader2 } from 'lucide-react'
 import { Badge } from './ui.jsx'
-import { formatarData, TEXTO_STATUS_TURMA, TOM_STATUS_TURMA } from '../lib/format.js'
+import {
+  formatarData,
+  situacaoAluno,
+  TEXTO_SITUACAO_ALUNO,
+  TOM_SITUACAO_ALUNO,
+  TEXTO_STATUS_TURMA,
+  TOM_STATUS_TURMA,
+} from '../lib/format.js'
 import { excluirTurma } from '../services/turmas.js'
 import { listarFaltas } from '../services/faltas.js'
 import { supabase } from '../lib/supabaseClient.js'
@@ -223,6 +230,8 @@ export default function TurmaDetalheModal({
               <div className="space-y-2">
                 {alunosExibidos.map((aluno) => {
                   const total = faltasPorAluno ? (faltasPorAluno[aluno.id] ?? 0) : null
+                  const situacao = situacaoAluno(aluno)
+                  const ehDesistente = situacao === 'desistente'
                   return (
                     <button
                       key={aluno.id}
@@ -230,11 +239,26 @@ export default function TurmaDetalheModal({
                       onClick={() => abrirAluno(aluno)}
                       className="group w-full text-left rounded-xl border border-purple-100 p-3 flex items-center gap-3 hover:border-purple-300 hover:bg-purple-50/50 transition"
                     >
-                      <div className="w-9 h-9 rounded-full bg-purple-600 text-white flex items-center justify-center font-semibold text-xs shrink-0">
+                      <div
+                        className={`w-9 h-9 rounded-full text-white flex items-center justify-center font-semibold text-xs shrink-0 ${
+                          ehDesistente ? 'bg-red-600 border-2 border-red-400' : 'bg-purple-600'
+                        }`}
+                      >
                         {aluno.nome?.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? '').join('')}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-medium text-gray-700 truncate group-hover:text-purple-700">{aluno.nome}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-gray-700 truncate min-w-0 group-hover:text-purple-700">
+                            {aluno.nome}
+                          </p>
+                          {ehDesistente && (
+                            <span className="shrink-0">
+                              <Badge tone={TOM_SITUACAO_ALUNO[situacao]}>
+                                {TEXTO_SITUACAO_ALUNO[situacao]}
+                              </Badge>
+                            </span>
+                          )}
+                        </div>
                         <p className="text-xs text-gray-400 truncate">{aluno.email || 'Sem e-mail'}</p>
                       </div>
                       {total != null && (
