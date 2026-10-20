@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import Image from 'next/image'
-import { X, Pencil, Trash2, MapPin, CalendarDays, Users, Plus, Filter, Loader2 } from 'lucide-react'
+import { X, Pencil, Trash2, MapPin, CalendarDays, Users, Plus, Filter, Loader2, BarChart3 } from 'lucide-react'
 import { Badge } from './ui.jsx'
 import {
   formatarData,
@@ -15,6 +15,7 @@ import { listarFaltas } from '../services/faltas.js'
 import { supabase } from '../lib/supabaseClient.js'
 import TurmaModal from './TurmaModal.jsx'
 import IncluirAlunoTurmaModal from './IncluirAlunoTurmaModal.jsx'
+import DesempenhoModal from './DesempenhoModal.jsx'
 import AlunoDetalheModal from './AlunoDetalheModal.jsx'
 
 const FILTROS_FALTAS = [
@@ -41,6 +42,7 @@ export default function TurmaDetalheModal({
   const [faltasDoSelecionado, setFaltasDoSelecionado] = useState([])
   const [filtroFaltas, setFiltroFaltas] = useState('todas')
   const [menuFiltroAberto, setMenuFiltroAberto] = useState(false)
+  const [modalDesempenho, setModalDesempenho] = useState(false)
 
   const idsNaTurma = new Set(alunosNaTurma.map((a) => a.id))
   const alunosDisponiveis = alunos.filter((a) => !idsNaTurma.has(a.id))
@@ -168,7 +170,7 @@ export default function TurmaDetalheModal({
           </div>
 
           <div className="border-t border-purple-100 pt-5">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2 text-purple-900">
                 <Users size={18} />
                 <h4 className="font-semibold">Alunos na turma</h4>
@@ -215,6 +217,14 @@ export default function TurmaDetalheModal({
                     </>
                   )}
                 </div>
+                <button
+                  type="button"
+                  onClick={() => setModalDesempenho(true)}
+                  title="Ver desempenho"
+                  className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-purple-100 text-purple-600 hover:bg-purple-50 transition"
+                >
+                  <BarChart3 size={16} />
+                </button>
                 <button
                   onClick={() => setModalIncluir(true)}
                   className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-xl text-sm font-medium transition"
@@ -295,6 +305,17 @@ export default function TurmaDetalheModal({
             setModalIncluir(false)
             onAtualizar?.()
           }}
+        />
+      )}
+
+      {modalDesempenho && (
+        <DesempenhoModal
+          turma={turma}
+          alunosNaTurma={alunosNaTurma}
+          faltasPorAluno={faltasPorAluno}
+          carregandoContagem={carregandoContagem}
+          totalAulas={24}
+          onClose={() => setModalDesempenho(false)}
         />
       )}
 
