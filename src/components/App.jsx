@@ -11,6 +11,7 @@ import Dashboard from './Dashboard.jsx'
 import Alunos from './Alunos.jsx'
 import Turmas from './Turmas.jsx'
 import Financeiro from './Financeiro.jsx'
+import Provas from './Provas.jsx'
 
 export default function App({
   alunosIniciais = [],
@@ -99,6 +100,11 @@ export default function App({
                 carregando={carregando}
                 erro={erro}
                 onAtualizar={carregar}
+              />
+            ) : tela === 'provas' ? (
+              <Provas
+                alunos={alunos}
+                turmas={turmas}
               />
             ) : (
               <Financeiro
