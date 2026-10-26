@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
 import { X, Pencil, Trash2, Loader2, ClipboardList } from 'lucide-react'
-import { inputClass, Badge } from './ui.jsx'
+import { Badge } from './ui.jsx'
+import { formatarNota } from '../lib/format.js'
 import { supabase } from '../lib/supabaseClient.js'
 import { listarNotasPorProva, excluirProva } from '../services/provas.js'
 import ProvaModal from './ProvaModal.jsx'
@@ -14,6 +15,11 @@ function statusDesempenho(nota) {
   return { texto: 'Ótimo', tone: 'green' }
 }
 
+const FILTROS_NOTA = [
+  { id: 'maior', label: 'Maior nota' },
+  { id: 'menor', label: 'Menor nota' },
+]
+
 export default function ProvaDetalheModal({
   prova,
   alunos = [],
@@ -25,7 +31,7 @@ export default function ProvaDetalheModal({
   const [notas, setNotas] = useState({})
   const [carregandoNotas, setCarregandoNotas] = useState(true)
   const [excluindo, setExcluindo] = useState(false)
-  const [filtroTurma, setFiltroTurma] = useState('todas')
+  const [filtroNota, setFiltroNota] = useState('maior')
   const [modalEditar, setModalEditar] = useState(false)
   const [msg, setMsg] = useState(null)
 
@@ -62,9 +68,16 @@ export default function ProvaDetalheModal({
   }, [alunos])
 
   const visiveis = useMemo(() => {
-    if (filtroTurma === 'todas') return alunosOrdenados
-    return alunosOrdenados.filter((a) => a.turma_id === filtroTurma)
-  }, [alunosOrdenados, filtroTurma])
+    const notaNum = (a) => {
+      const n = notas[a.id]
+      return typeof n === 'number' && !Number.isNaN(n) ? n : null
+    }
+    const comNota = alunosOrdenados.filter((a) => notaNum(a) !== null)
+    if (filtroNota === 'menor') {
+      return [...comNota].sort((a, b) => notaNum(a) - notaNum(b))
+    }
+    return [...comNota].sort((a, b) => notaNum(b) - notaNum(a))
+  }, [alunosOrdenados, notas, filtroNota])
 
   const maxQuestoes = provaAtual?.total_questoes ? Number(provaAtual.total_questoes) : null
 
@@ -150,25 +163,29 @@ export default function ProvaDetalheModal({
             )}
             {maxQuestoes !== null && <Badge tone="gray">Total: {maxQuestoes} questões</Badge>}
             {media !== null && (
-              <Badge tone="green">Média: {media.toFixed(1)}</Badge>
+              <Badge tone="green">Média: {formatarNota(media)}</Badge>
             )}
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <div className="flex-1">
-              <span className="block text-sm font-medium text-gray-600 mb-1">Filtrar por turma</span>
-              <select
-                value={filtroTurma}
-                onChange={(e) => setFiltroTurma(e.target.value)}
-                className={inputClass}
-              >
-                <option value="todas">Todas as turmas</option>
-                {turmas.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    Turma {t.numero_turma}
-                  </option>
-                ))}
-              </select>
+          <div>
+            <span className="block text-sm font-medium text-gray-600 mb-1">
+              Classificar por nota
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {FILTROS_NOTA.map((opcao) => (
+                <button
+                  key={opcao.id}
+                  type="button"
+                  onClick={() => setFiltroNota(opcao.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-medium transition ${
+                    filtroNota === opcao.id
+                      ? 'bg-purple-600 text-white'
+                      : 'bg-white border border-purple-100 text-gray-500 hover:bg-purple-50'
+                  }`}
+                >
+                  {opcao.label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -184,7 +201,7 @@ export default function ProvaDetalheModal({
                 <Loader2 size={16} className="animate-spin" /> Carregando resultados...
               </div>
             ) : visiveis.length === 0 ? (
-              <p className="px-4 py-6 text-sm text-gray-400">Nenhum aluno nesta seleção.</p>
+              <p className="px-4 py-6 text-sm text-gray-400">Nenhum aluno com nota nesta prova.</p>
             ) : (
               <>
                 <div className="flex items-center gap-3 px-4 py-2 text-xs font-medium text-gray-400 uppercase tracking-wide border-b border-purple-50">
@@ -216,7 +233,9 @@ export default function ProvaDetalheModal({
 
                         <div className="w-16 text-right">
                           {temNota ? (
-                            <span className="text-sm font-semibold text-gray-800">{nota}</span>
+                            <span className="text-sm font-semibold text-gray-800">
+                              {formatarNota(nota)}
+                            </span>
                           ) : (
                             <span className="text-sm text-gray-300">—</span>
                           )}

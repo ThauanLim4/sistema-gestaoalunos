@@ -12,6 +12,13 @@ export function formatarVencimento(dia) {
   return `Dia ${dia}`
 }
 
+export function formatarNota(valor) {
+  if (valor === null || valor === undefined || valor === '') return '—'
+  const numero = Number(valor)
+  if (!Number.isFinite(numero)) return '—'
+  return numero.toFixed(1).replace('.', ',')
+}
+
 export function iniciais(nome) {
   if (!nome) return '?'
   return nome
