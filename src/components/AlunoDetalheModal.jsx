@@ -94,10 +94,10 @@ export default function AlunoDetalheModal({ aluno, faltasIniciais = [], turmas =
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto overflow-x-hidden [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden relative"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-purple-100 sticky top-0 bg-white rounded-t-2xl">
+        <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-6 py-4 bg-white border-b border-purple-100 rounded-t-2xl">
           <h3 className="text-lg font-semibold text-purple-900">Detalhes do aluno</h3>
           <div className="flex items-center gap-1">
             <button
@@ -121,7 +121,7 @@ export default function AlunoDetalheModal({ aluno, faltasIniciais = [], turmas =
           </div>
         </div>
 
-        <div className="relative h-40 w-full sm:h-48">
+        <div className="relative h-40 w-full sm:h-48 mt-[64px]">
           <Image
             src="/usuario_fundo_modal_aluno.png"
             alt="Fundo decorativo do aluno"
