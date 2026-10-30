@@ -145,14 +145,14 @@ export default function ProvaDetalheModal({
           </div>
         </div>
 
-        <div className="relative h-40 w-full sm:h-48 mt-[64px]">
+        <div className="relative h-40 w-full sm:h-48 mt-[64px] bg-[#890DE4]">
           <Image
             src="/caderno_e_lapis_em_gravura_classica.png"
             alt="Fundo decorativo da prova"
             fill
             priority
             sizes="(max-width: 672px) 100vw, 672px"
-            className="object-cover"
+            className="object-contain object-center"
           />
         </div>
 

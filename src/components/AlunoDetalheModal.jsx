@@ -121,14 +121,14 @@ export default function AlunoDetalheModal({ aluno, faltasIniciais = [], turmas =
           </div>
         </div>
 
-        <div className="relative h-40 w-full sm:h-48 mt-[64px]">
+        <div className="relative h-40 w-full sm:h-48 mt-[64px] bg-[#890DE4]">
           <Image
             src="/usuario_fundo_modal_aluno.png"
             alt="Fundo decorativo do aluno"
             fill
             priority
             sizes="(max-width: 672px) 100vw, 672px"
-            className="object-cover"
+            className="object-contain object-center"
           />
         </div>
 

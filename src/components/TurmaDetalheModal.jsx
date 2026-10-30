@@ -127,14 +127,14 @@ export default function TurmaDetalheModal({
           </div>
         </div>
 
-        <div className="relative h-40 w-full sm:h-48 mt-[64px]">
+        <div className="relative h-40 w-full sm:h-48 mt-[64px] bg-[#890DE4]">
           <Image
             src="/computador_vintage_plano_de_fundo_do_modal_turmas_fundo_roxo.png"
             alt="Fundo decorativo da turma"
             fill
             priority
             sizes="(max-width: 672px) 100vw, 672px"
-            className="object-cover"
+            className="object-contain object-center"
           />
         </div>
 
@@ -179,14 +179,14 @@ export default function TurmaDetalheModal({
               <div className="flex items-center gap-2">
                 <div className="relative">
                   {carregandoContagem ? (
-                      <span className="inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-purple-100 text-purple-400">
+                      <span className="inline-flex items-center gap-2 h-9 px-3 rounded-xl text-sm font-medium border border-purple-100 text-purple-400">
                         <Loader2 size={16} className="animate-spin" /> Contando...
                       </span>
                     ) : (
                       <button
                         onClick={() => setMenuFiltroAberto((v) => !v)}
                         title="Filtrar por faltas"
-                        className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border transition ${
+                        className={`inline-flex items-center gap-2 h-9 px-3 rounded-xl text-sm font-medium border transition ${
                           filtroFaltas === 'todas'
                             ? 'border-purple-100 text-purple-600 hover:bg-purple-50'
                             : 'border-purple-300 bg-purple-50 text-purple-700'
@@ -221,13 +221,13 @@ export default function TurmaDetalheModal({
                   type="button"
                   onClick={() => setModalDesempenho(true)}
                   title="Ver desempenho"
-                  className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-sm font-medium border border-purple-100 text-purple-600 hover:bg-purple-50 transition"
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-purple-100 text-purple-600 hover:bg-purple-50 transition"
                 >
                   <BarChart3 size={16} />
                 </button>
                 <button
                   onClick={() => setModalIncluir(true)}
-                  className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-xl text-sm font-medium transition"
+                  className="inline-flex items-center gap-2 h-9 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition whitespace-nowrap"
                 >
                   <Plus size={16} /> Incluir aluno
                 </button>
