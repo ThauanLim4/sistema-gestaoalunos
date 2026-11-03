@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react'
 import Image from 'next/image'
-import { X, Pencil, Trash2, Loader2, ClipboardList } from 'lucide-react'
+import { X, Pencil, Trash2, Loader2, ClipboardList, Plus } from 'lucide-react'
 import { Badge } from './ui.jsx'
 import { formatarNota } from '../lib/format.js'
 import { supabase } from '../lib/supabaseClient.js'
 import { listarNotasPorProva, excluirProva } from '../services/provas.js'
 import ProvaModal from './ProvaModal.jsx'
+import LancarNotaModal from './LancarNotaModal.jsx'
 
 function statusDesempenho(nota) {
   if (nota === null) return { texto: 'Sem nota', tone: 'gray' }
@@ -33,6 +34,7 @@ export default function ProvaDetalheModal({
   const [excluindo, setExcluindo] = useState(false)
   const [filtroNota, setFiltroNota] = useState('maior')
   const [modalEditar, setModalEditar] = useState(false)
+  const [modalLancar, setModalLancar] = useState(false)
   const [msg, setMsg] = useState(null)
 
   useEffect(() => {
@@ -79,6 +81,11 @@ export default function ProvaDetalheModal({
     return [...comNota].sort((a, b) => notaNum(b) - notaNum(a))
   }, [alunosOrdenados, notas, filtroNota])
 
+  const alunosDisponiveis = useMemo(() => {
+    const comNotaSet = new Set(Object.keys(notas).filter((k) => typeof notas[k] === 'number'))
+    return alunosOrdenados.filter((a) => !comNotaSet.has(a.id))
+  }, [alunosOrdenados, notas])
+
   const maxQuestoes = provaAtual?.total_questoes ? Number(provaAtual.total_questoes) : null
 
   const media = useMemo(() => {
@@ -108,6 +115,24 @@ export default function ProvaDetalheModal({
     setProvaAtual(salva)
     setModalEditar(false)
     onRecarregar?.()
+  }
+
+  async function handleNotaLançada() {
+    setModalLancar(false)
+    setCarregandoNotas(true)
+    try {
+      const lista = await listarNotasPorProva(provaAtual.id, supabase)
+      const mapa = {}
+      for (const n of lista) {
+        mapa[n.aluno_id] = n.nota === null || n.nota === undefined ? null : Number(n.nota)
+      }
+      setNotas(mapa)
+      onRecarregar?.()
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setCarregandoNotas(false)
+    }
   }
 
   return (
@@ -167,10 +192,7 @@ export default function ProvaDetalheModal({
             )}
           </div>
 
-          <div>
-            <span className="block text-sm font-medium text-gray-600 mb-1">
-              Classificar por nota
-            </span>
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap gap-2">
               {FILTROS_NOTA.map((opcao) => (
                 <button
@@ -187,6 +209,13 @@ export default function ProvaDetalheModal({
                 </button>
               ))}
             </div>
+            <button
+              type="button"
+              onClick={() => setModalLancar(true)}
+              className="inline-flex items-center gap-2 h-8 px-3 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium transition"
+            >
+              <Plus size={14} /> Lançar nota
+            </button>
           </div>
 
           <div className="rounded-2xl border border-purple-100 bg-white">
@@ -273,6 +302,15 @@ export default function ProvaDetalheModal({
           prova={provaAtual}
           onClose={() => setModalEditar(false)}
           onSalvo={handleProvaSalva}
+        />
+      )}
+
+      {modalLancar && (
+        <LancarNotaModal
+          prova={provaAtual}
+          alunosDisponiveis={alunosDisponiveis}
+          onClose={() => setModalLancar(false)}
+          onSalvo={handleNotaLançada}
         />
       )}
     </div>

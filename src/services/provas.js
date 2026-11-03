@@ -62,6 +62,22 @@ export async function listarNotasPorProva(provaId, supabase = getBrowserClient()
   return data ?? []
 }
 
+export async function adicionarNota(dados, supabase = getBrowserClient()) {
+  const { data, error } = await supabase
+    .from('notas')
+    .insert({
+      aluno_id: dados.aluno_id,
+      prova_id: dados.prova_id,
+      nota: dados.nota,
+      feita_em: dados.feita_em || new Date().toISOString(),
+    })
+    .select(COLUNAS_NOTA)
+    .single()
+
+  if (error) throw error
+  return data
+}
+
 // entradas: [{ aluno_id, nota }] — nota vazia/null remove o registro existente
 export async function salvarNotasProva(provaId, entradas, supabase = getBrowserClient()) {
   const existentes = await listarNotasPorProva(provaId, supabase)
